@@ -23,7 +23,17 @@ button, input { font: inherit; }
 
 .layout { display: grid; gap: 12px; padding: 12px; max-width: 1600px; margin: 0 auto; }
 .map-card, .panel > section, .status-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
-.map-card { padding: 10px; display: flex; flex-direction: column; min-width: 0; }
+.map-card { position: relative; padding: 10px; display: flex; flex-direction: column; min-width: 0; }
+.result-strip { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 7px 9px; border: 1px solid #af9551; border-radius: 8px; background: #3b321d; color: #ffe1a4; font-weight: 700; font-size: .84rem; }
+.result-strip span { min-width: 0; flex: 1; }
+.result-strip .ghost { min-height: 34px; flex: none; padding: 4px 9px; }
+.result-strip.tone-good { border-color: #3cae78; background: #173a30; color: #baffd5; }
+.result-strip.tone-bad { border-color: #d76b62; background: #442927; color: #ffd0c9; }
+.day-headline { position: absolute; z-index: 8; top: 50%; left: 50%; width: min(92%, 600px); padding: 15px 12px; border: 2px solid var(--amber); border-radius: 12px; background: rgba(8, 20, 29, .93); color: #fff1c2; font-size: clamp(1.45rem, 6vw, 2.6rem); font-weight: 900; line-height: 1.25; text-align: center; text-shadow: 0 2px 12px #000; pointer-events: none; transform: translate(-50%, -50%); }
+.day-headline.headline-enter { animation: headline-pop 1.8s ease-out both; }
+@keyframes headline-pop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.7); } 16%, 78% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.08); } }
+.map-card.impact-shake { animation: map-impact .2s ease-in-out; }
+@keyframes map-impact { 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-3px); } }
 .victory-tracker { border: 1px solid #526f80; border-radius: 12px; padding: 8px 10px; margin-bottom: 8px; background: #102633; }
 .victory-headline { display: block; font-size: 1.04rem; line-height: 1.2; margin-bottom: 7px; }
 .victory-headline.tone-blue { color: #83b5ff; }
@@ -79,6 +89,10 @@ button, input { font: inherit; }
 #pressure-fill { height: 100%; border-radius: 10px; background-image: linear-gradient(90deg, #2bb3a3, #e0a84a 55%, #d0473c); background-repeat: no-repeat; transition: width .3s; }
 
 .unit-list { display: grid; gap: 8px; }
+.unit-list-row { display: flex; align-items: stretch; gap: 5px; min-width: 0; }
+.unit-list-row .unit-button { min-width: 0; flex: 1; }
+.quick-defend { flex: none; min-width: 58px; min-height: 44px; padding: 3px 6px; font-size: .79rem; }
+.defend-all { width: 100%; margin-top: 7px; }
 .unit-button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 64px; padding: 4px 10px 4px 4px; text-align: left; color: var(--text); background: rgba(255, 255, 255, .04); border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
 .unit-button:hover { background: rgba(255, 255, 255, .08); }
 .unit-button.active { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber) inset; background: rgba(224, 168, 74, .1); }
@@ -224,7 +238,7 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
   .game-over-actions #view-map { grid-column: 1 / -1; }
   .order-toast { position: fixed; z-index: 45; left: 16px; right: 16px; top: 48%; margin: 0; padding: 12px 16px; box-shadow: 0 8px 30px #000; pointer-events: none; text-align: center; }
 }
-@media (prefers-reduced-motion: reduce) { .victory-warning, .victory-meter.under-attack strong, .victory-meter.meter-flash, .game-over-dialog, .game-over-dialog::before { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .victory-warning, .victory-meter.under-attack strong, .victory-meter.meter-flash, .game-over-dialog, .game-over-dialog::before, .day-headline.headline-enter, .map-card.impact-shake { animation: none; } }
 
 /* ---- J13 onboarding: header, coach bar, goal ---- */
 .header-right { display: flex; align-items: center; gap: 10px; }
@@ -288,7 +302,7 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
   .sheet-titles strong { font-size: 1.05rem; }
   .sheet-titles .muted { font-size: .76rem; }
   .sheet-close { min-height: 36px; padding: 2px 10px; font-size: .85rem; }
-  .sheet-units { grid-template-columns: repeat(auto-fill, minmax(116px, 1fr)); gap: 6px; }
+  .sheet-units { grid-template-columns: 1fr; gap: 6px; }
   .unit-button.chip { min-height: 48px; padding: 3px 6px 3px 3px; gap: 6px; align-items: center; }
   .unit-button.chip img { width: 36px; height: 36px; }
   .unit-button.chip .unit-name { font-size: .85rem; line-height: 1.2; }
@@ -382,7 +396,7 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
   </header>
   <main class="layout">
     <section class="map-card" aria-label="推演地圖">
-      <div class="section-heading"><h1>戰區地圖</h1><div class="fx-controls"><button id="fx-skip" type="button" class="ghost hidden">跳過</button><button id="fx-speed" type="button" class="ghost">1×</button><button id="fx-mute" type="button" class="ghost" aria-label="靜音">🔊</button></div></div>
+      <div class="section-heading"><h1>戰區地圖</h1><div class="fx-controls"><button id="fx-skip" type="button" class="ghost hidden">跳過</button><button id="fx-speed" type="button" class="ghost">2×</button><button id="fx-mute" type="button" class="ghost" aria-label="靜音">🔊</button></div></div>
       <div id="victory-tracker" class="victory-tracker" aria-label="勝負儀表">
         <strong id="victory-headline" class="victory-headline"></strong>
         <div id="victory-warning" class="victory-warning hidden" role="alert"></div>
@@ -394,11 +408,13 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
         </div>
         <small id="victory-rules"></small>
       </div>
+      <div id="result-strip" class="result-strip hidden" role="status"><span id="result-strip-text"></span><button id="result-detail" type="button" class="ghost">看明細</button></div>
       <div id="final-map-banner" class="final-map-banner hidden" role="button" tabindex="0" title="再看結算"></div>
       <div id="coach-bar" class="coach-bar" role="status" aria-live="polite"><span id="coach-mark" class="coach-mark" aria-hidden="true"></span><span id="coach-text"></span></div>
       <div id="order-toast" class="order-toast hidden" role="status"></div>
       <div id="armed-banner" class="armed-banner hidden"><svg viewBox="0 0 64 64" aria-hidden="true"><use id="armed-icon" href="#ico-air"/></svg><span id="armed-text"></span><button id="armed-cancel" type="button" aria-label="取消選中">✕取消</button></div>
       <svg id="map" viewBox="300 30 680 500" preserveAspectRatio="xMidYMid meet" role="img" aria-label="台灣海峽區域示意地圖"></svg>
+      <div id="day-headline" class="day-headline hidden" aria-live="polite"></div>
       <div class="map-legend"><span class="legend-blue">藍方控制</span><span class="legend-red">紅方控制</span><span class="legend-sea">海域</span><span>實線：移動　虛線：打擊</span></div>
       <div class="unit-legend" aria-label="單位圖示">
         <span><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#ico-ground"/></svg>地面旅</span>
@@ -427,6 +443,7 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
         <h2 id="selection-heading">選取區域</h2>
         <p id="selection-hint" class="muted">點選地圖上的區域，查看己方單位。</p>
         <div id="unit-list" class="unit-list"></div>
+        <button id="defend-all" type="button" class="ghost defend-all hidden">本區全部防守</button>
         <div id="order-options" class="order-options"></div>
         <p id="message" class="message" role="status" aria-live="polite"></p>
       </section>
@@ -435,6 +452,7 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
         <div id="assigned-orders" class="assigned-orders"></div>
         <div class="actions">
           <button id="ai-help" type="button" class="ghost">AI 幫我下令</button>
+          <button id="ai-finish" type="button" class="ghost">AI 下令並結束本日</button>
           <button id="clear-orders" type="button" class="ghost">清除命令</button>
           <button id="end-turn" type="button" class="primary">結束本日</button>
         </div>
@@ -511,6 +529,7 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
   <div id="action-sheet" class="action-sheet hidden" role="region" aria-label="選取區域的單位與命令">
     <div class="sheet-head"><div class="sheet-titles"><strong id="sheet-title"></strong><span id="sheet-hint" class="muted"></span></div><button id="sheet-close" type="button" class="ghost sheet-close" aria-label="收合">✕ 收合</button></div>
     <div id="sheet-units" class="unit-list sheet-units"></div>
+    <button id="sheet-defend-all" type="button" class="ghost defend-all hidden">本區全部防守</button>
     <div id="sheet-orders" class="order-options sheet-orders"></div>
     <p id="sheet-msg" class="message"></p>
   </div>
@@ -1621,7 +1640,7 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
   <script>
 (function (root) {
   'use strict';
-  var value = {"viewBox":"0 0 1100 800","mobile":{"viewBox":"350 40 510 480","regions":{"SN":{"label":[557.5,147.5],"stack":[572.5,175.5]},"SC":{"label":[557.5,292.5],"stack":[572.5,320.5]},"SS":{"label":[557.5,435.0],"stack":[552.5,468.0]},"SWS":{"label":[398.0,498.0],"stack":[368.0,496.0]},"BS":{"label":[800.0,498.0],"stack":[830.0,496.0]},"ES":{"label":[812.0,365.0],"stack":[787.0,418.0]},"EN":{"label":[812.0,105.0],"stack":[807.0,138.0]},"PS":{"label":[812.0,400.0],"stack":[817.0,433.0]},"RE":{"label":[557.5,62.0],"stack":[552.5,95.0]},"RN":{"label":[398.0,117.5],"stack":[393.0,150.5]},"RC":{"label":[398.0,317.5],"stack":[393.0,350.5]},"RS":{"label":[398.0,429.67],"stack":[393.0,462.67]},"N":{"label":[747.33,190.63],"stack":[767.33,213.63]},"NE":{"label":[744.09,235.0],"stack":[739.09,268.0]},"NW":{"label":[673.44,245.0],"stack":[668.44,278.0]},"C":{"label":[656.21,315.0],"stack":[651.21,348.0]},"SW":{"label":[652.62,385.0],"stack":[647.62,418.0]},"S":{"label":[669.38,464.77],"stack":[664.38,497.77]},"E":{"label":[739.03,340.0],"stack":[734.03,373.0]},"PH":{"label":[554.23,347.13],"stack":[549.23,380.13]},"KM":{"label":[430.87,252.41],"stack":[425.87,285.4]},"MZ":{"label":[595.0,85.0],"stack":[590.0,118.0]},"WQ":{"label":[546.0,200.0],"stack":[541.0,233.0]},"DS":{"label":[398.0,498.0],"stack":[428.0,496.0]},"LY":{"label":[754.73,497.45],"stack":[724.73,495.45]},"GI":{"label":[749.0,434.0],"stack":[744.0,467.0]}}},"source":"Natural Earth (public domain), data/regions_v03.json","regions":{"SN":{"path":"M415.00 235.00 L700.00 235.00 L700.00 60.00 L415.00 60.00 Z","label":[557.5,147.5],"stack":[572.5,175.5]},"SC":{"path":"M415.00 350.00 L700.00 350.00 L700.00 235.00 L415.00 235.00 Z","label":[557.5,292.5],"stack":[572.5,320.5]},"SS":{"path":"M415.00 520.00 L700.00 520.00 L700.00 350.00 L415.00 350.00 Z","label":[557.5,435.0],"stack":[552.5,468.0]},"SWS":{"path":"M0.00 800.00 L600.00 800.00 L600.00 520.00 L0.00 520.00 Z","label":[300.0,660.0],"stack":[295.0,693.0]},"BS":{"path":"M600.00 800.00 L1000.00 800.00 L1000.00 520.00 L600.00 520.00 Z","label":[800.0,660.0],"stack":[795.0,693.0]},"ES":{"path":"M700.00 520.00 L1000.00 520.00 L1000.00 210.00 L700.00 210.00 Z","label":[850.0,365.0],"stack":[845.0,398.0]},"EN":{"path":"M700.00 210.00 L1000.00 210.00 L1000.00 0.00 L700.00 0.00 Z","label":[850.0,105.0],"stack":[845.0,138.0]},"PS":{"path":"M1000.00 800.00 L1100.00 800.00 L1100.00 0.00 L1000.00 0.00 Z","label":[1050.0,400.0],"stack":[1045.0,433.0]},"RE":{"path":"M415.00 60.00 L700.00 60.00 L700.00 0.00 L415.00 0.00 Z","label":[557.5,30.0],"stack":[552.5,63.0]},"RN":{"path":"M0.00 235.00 L0.00 0.00 L415.00 0.00 L414.03 235.00 Z","label":[207.5,117.5],"stack":[202.5,150.5]},"RC":{"path":"M0.00 400.00 L0.00 235.00 L414.03 235.00 L411.04 241.59 L404.44 238.23 L403.74 243.94 L400.29 243.76 L400.93 241.93 L397.49 244.73 L405.81 248.41 L399.95 252.91 L402.17 255.43 L386.77 251.04 L382.59 251.95 L390.11 254.68 L379.13 253.25 L390.73 261.51 L404.30 259.33 L401.59 267.32 L405.30 265.31 L409.06 265.85 L412.65 273.80 L407.18 274.54 L398.93 280.69 L397.88 283.79 L394.36 278.74 L390.73 281.37 L393.78 283.83 L389.58 291.34 L389.36 297.20 L383.91 297.64 L377.20 304.11 L374.81 309.25 L372.93 308.06 L373.79 304.95 L379.81 297.82 L376.17 298.52 L377.61 296.27 L376.33 292.97 L375.00 296.27 L372.41 296.62 L366.71 293.73 L367.97 296.10 L370.88 296.45 L368.85 300.25 L369.51 304.64 L364.86 309.08 L362.55 315.98 L363.93 320.59 L359.17 326.29 L359.82 314.76 L357.11 309.67 L341.66 305.32 L340.97 308.66 L346.85 308.81 L349.96 312.59 L349.01 316.74 L346.35 321.17 L343.43 322.41 L338.24 320.48 L331.91 323.84 L329.26 321.05 L327.74 321.78 L329.23 323.78 L326.36 334.46 L327.91 336.37 L325.71 338.44 L323.90 339.45 L322.95 330.72 L320.85 333.51 L321.92 337.04 L315.08 339.31 L308.42 344.94 L306.84 334.87 L302.34 334.13 L295.07 338.91 L291.76 336.21 L294.09 334.13 L291.65 333.73 L287.21 339.31 L288.33 344.04 L284.97 348.87 L287.26 352.62 L286.66 354.98 L277.32 365.06 L265.78 364.55 L252.32 358.15 L252.32 362.25 L257.30 367.63 L264.19 368.12 L269.12 366.10 L270.94 368.02 L274.86 367.37 L277.71 375.96 L280.48 376.39 L278.39 378.76 L270.56 372.34 L266.72 371.87 L271.51 375.62 L267.12 378.54 L264.68 383.70 L261.52 382.17 L261.15 376.13 L250.89 376.59 L252.70 379.94 L256.40 377.70 L260.45 379.04 L254.51 385.52 L253.36 389.09 L256.33 398.12 L252.73 400.00 Z","label":[207.01,317.5],"stack":[202.01,350.5]},"RS":{"path":"M0.00 464.10 L0.00 451.14 L2.99 452.17 L3.06 450.45 L8.53 447.71 L4.20 449.32 L0.00 446.97 L0.00 400.00 L252.73 400.00 L249.47 406.06 L237.96 407.10 L228.91 402.11 L221.36 401.72 L220.10 402.65 L228.15 404.21 L217.10 413.55 L209.57 417.41 L209.13 413.16 L212.37 410.53 L204.21 406.71 L208.73 411.03 L207.62 413.21 L195.80 419.53 L188.35 420.54 L182.60 425.34 L179.78 424.56 L178.80 420.22 L181.36 422.37 L180.48 418.49 L173.69 414.83 L169.70 414.93 L170.36 413.07 L168.25 411.18 L172.13 409.55 L173.03 406.58 L157.79 412.27 L156.06 415.07 L153.30 413.80 L154.76 410.46 L150.56 410.22 L145.09 406.81 L140.60 407.50 L142.73 409.94 L148.30 409.82 L149.42 413.92 L146.80 415.07 L155.94 416.39 L161.21 413.64 L152.70 423.30 L152.39 425.82 L155.56 428.56 L156.73 425.27 L159.01 426.28 L156.25 429.44 L157.52 433.17 L146.48 429.90 L137.35 430.58 L133.85 426.69 L142.41 423.80 L141.12 421.17 L136.40 423.64 L133.06 421.15 L123.34 421.18 L123.28 419.47 L132.02 414.95 L131.71 409.55 L130.38 409.70 L124.56 416.46 L117.29 417.88 L118.03 421.52 L113.29 418.85 L106.55 420.40 L101.78 426.30 L102.89 429.16 L98.53 431.07 L95.47 429.65 L94.17 424.61 L92.68 423.88 L91.68 425.60 L86.25 423.68 L88.07 427.85 L92.67 428.31 L96.66 432.35 L90.19 440.19 L91.91 443.88 L89.60 445.25 L88.02 444.09 L88.68 440.91 L86.58 439.83 L75.41 441.03 L74.38 439.06 L74.20 426.73 L82.13 420.94 L77.52 418.42 L75.49 421.83 L69.55 420.74 L56.33 426.73 L57.11 429.76 L52.21 429.40 L50.66 435.35 L59.03 435.61 L49.54 443.80 L50.93 445.05 L54.32 443.06 L61.77 448.59 L51.58 454.74 L48.51 453.17 L47.96 445.38 L40.87 438.84 L27.62 441.20 L21.00 446.55 L25.46 444.90 L28.92 449.48 L33.51 449.36 L25.38 454.82 L21.18 452.94 L21.71 455.21 L16.75 455.19 L21.18 457.94 L20.93 460.13 L23.82 456.46 L26.72 456.93 L27.26 459.03 L28.90 457.40 L27.65 455.60 L32.37 452.00 L34.76 457.71 L35.99 453.88 L37.02 456.00 L39.98 456.39 L40.13 458.73 L38.18 458.09 L37.02 460.20 L38.97 463.40 L37.64 462.94 L35.76 466.76 L31.86 461.06 L27.80 460.90 L27.65 465.20 L25.84 463.79 L27.26 467.93 L31.16 470.27 L28.90 471.28 L29.67 474.17 L25.55 467.77 L23.89 471.83 L19.55 468.17 L17.19 471.13 L10.48 463.01 L1.50 464.10 Z","label":[139.0,429.67],"stack":[134.0,462.67]},"N":{"path":"M694.12 210.00 L705.93 194.98 L737.88 184.21 L744.32 186.36 L739.91 180.79 L746.13 173.81 L753.97 171.26 L759.79 172.86 L764.97 180.29 L768.44 179.95 L767.64 182.06 L770.39 184.31 L790.51 189.34 L791.92 197.80 L800.54 199.81 L792.68 203.34 L786.05 210.00 Z","label":[747.33,190.63],"stack":[767.33,213.63]},"NE":{"path":"M700.00 260.00 L700.00 210.00 L786.05 210.00 L780.88 219.48 L781.50 235.56 L788.18 240.22 L784.08 240.97 L785.60 244.95 L783.01 248.08 L784.00 251.86 L778.00 256.73 L778.06 260.00 Z","label":[744.09,235.0],"stack":[739.09,268.0]},"NW":{"path":"M646.88 280.00 L655.81 261.41 L664.89 251.61 L670.22 239.30 L677.81 233.43 L682.67 233.39 L694.12 210.00 L700.00 210.00 L700.00 280.00 Z","label":[673.44,245.0],"stack":[668.44,278.0]},"C":{"path":"M612.43 348.00 L614.17 346.21 L614.36 336.20 L618.92 322.52 L629.22 308.81 L635.04 296.19 L641.19 290.31 L642.20 284.78 L646.88 280.00 L700.00 280.00 L700.00 350.00 L612.48 350.00 Z","label":[656.21,315.0],"stack":[651.21,348.0]},"SW":{"path":"M605.24 394.42 L610.04 390.30 L605.94 388.93 L608.92 388.23 L605.94 384.90 L608.69 381.80 L607.86 379.30 L612.47 370.50 L611.65 368.21 L614.89 367.77 L612.08 365.87 L613.01 363.90 L616.46 363.83 L613.05 354.90 L615.75 350.85 L612.48 350.00 L700.00 350.00 L700.00 420.00 L619.81 420.00 L620.35 416.03 L614.21 401.97 L616.62 396.83 L614.21 396.51 L611.41 399.24 L610.79 395.14 L605.52 395.63 Z","label":[652.62,385.0],"stack":[647.62,418.0]},"S":{"path":"M619.81 420.00 L718.94 420.00 L702.91 434.25 L694.83 447.32 L688.14 465.41 L687.92 494.42 L683.57 501.27 L684.03 509.54 L676.74 504.07 L673.73 503.39 L672.73 506.55 L670.04 505.16 L668.17 497.75 L669.70 488.68 L662.13 470.49 L651.20 457.52 L633.12 448.03 L628.52 441.99 L633.37 447.41 L631.35 442.29 L624.58 435.75 L624.63 429.01 L620.00 420.75 Z","label":[669.38,464.77],"stack":[664.38,497.77]},"E":{"path":"M700.00 420.00 L700.00 260.00 L778.06 260.00 L775.86 266.77 L777.27 269.08 L766.29 280.69 L760.74 292.32 L762.92 298.50 L752.15 334.13 L746.22 365.70 L740.89 374.54 L740.01 385.45 L734.74 391.67 L729.96 404.08 L719.03 415.68 L718.94 420.00 Z","label":[739.03,340.0],"stack":[734.03,373.0]},"PH":{"path":"M552.71 346.00 L558.72 345.12 L555.24 343.75 L555.24 340.96 L561.31 338.97 L560.63 340.96 L564.80 339.65 L566.58 342.67 L566.85 345.12 L564.06 343.65 L558.24 348.11 L554.56 347.69 Z M544.24 343.75 L547.45 342.03 L550.13 334.96 L551.73 336.24 L549.17 342.90 L545.66 343.75 Z M554.53 333.51 L556.64 332.08 L559.62 334.67 L557.68 337.75 L556.18 335.02 Z M540.76 378.66 L543.60 378.03 L541.33 380.30 Z M539.70 375.45 L542.07 376.32 L539.80 376.32 Z M560.03 374.72 L561.07 374.43 L560.43 375.18 Z M560.94 374.35 L561.01 374.10 L561.09 374.35 Z M565.81 374.30 L566.93 373.67 L566.02 374.75 Z M564.77 373.67 L565.23 373.41 L564.89 373.72 Z M549.74 373.16 L550.19 372.54 L550.42 372.88 Z M532.67 368.12 L532.92 368.08 L532.77 368.27 Z M531.19 367.58 L531.44 367.54 L531.30 367.73 Z M532.67 367.47 L532.97 367.66 L532.81 368.01 Z M551.27 363.78 L553.27 362.80 L551.42 363.90 Z M547.10 361.26 L548.50 359.37 L550.31 364.33 L547.96 364.19 L547.32 362.07 Z M530.65 359.83 L532.07 359.14 L530.94 360.00 Z M549.97 350.79 L553.44 350.27 L550.10 351.43 Z M558.85 325.70 L561.28 325.02 L559.41 327.25 L559.02 326.04 Z","label":[554.23,347.13],"stack":[549.23,380.13]},"KM":{"path":"M427.96 259.16 L429.27 256.79 L428.21 252.26 L431.67 250.67 L438.14 252.65 L439.42 247.73 L442.26 247.20 L444.96 249.45 L446.74 253.82 L444.88 258.45 L440.36 256.40 L431.82 260.95 L428.39 259.87 Z M415.00 256.46 L415.00 246.57 L418.14 246.49 L418.87 250.59 L415.38 256.29 Z M420.90 258.84 L423.31 254.92 L426.27 255.82 L422.02 259.25 Z M429.77 243.86 L433.55 244.44 L432.65 245.68 L430.13 244.26 Z","label":[430.87,252.41],"stack":[425.87,285.4]},"MZ":{"path":"M585.00 85.00 L587.93 92.07 L595.00 95.00 L602.07 92.07 L605.00 85.00 L602.07 77.93 L595.00 75.00 L587.93 77.93 Z","label":[595.0,85.0],"stack":[590.0,118.0]},"WQ":{"path":"M536.00 200.00 L538.93 207.07 L546.00 210.00 L553.07 207.07 L556.00 200.00 L553.07 192.93 L546.00 190.00 L538.93 192.93 Z","label":[546.0,200.0],"stack":[541.0,233.0]},"DS":{"path":"M262.00 630.00 L264.93 637.07 L272.00 640.00 L279.07 637.07 L282.00 630.00 L279.07 622.93 L272.00 620.00 L264.93 622.93 Z","label":[272.0,630.0],"stack":[267.0,663.0]},"LY":{"path":"M749.20 491.78 L756.66 491.78 L756.01 494.65 L758.77 498.61 L751.32 496.49 L749.88 492.52 Z M759.82 504.77 L760.12 504.28 L760.25 505.12 Z","label":[754.73,497.45],"stack":[749.73,530.45]},"GI":{"path":"M739.00 434.00 L741.93 441.07 L749.00 444.00 L756.07 441.07 L759.00 434.00 L756.07 426.93 L749.00 424.00 L741.93 426.93 Z","label":[749.0,434.0],"stack":[744.0,467.0]}}};
+  var value = {"viewBox":"0 0 1100 800","mobile":{"viewBox":"350 40 510 520","regions":{"SN":{"label":[557.5,147.5],"stack":[572.5,175.5]},"SC":{"label":[557.5,292.5],"stack":[572.5,320.5]},"SS":{"label":[557.5,435.0],"stack":[552.5,468.0]},"SWS":{"label":[398.0,538.0],"stack":[368.0,536.0]},"BS":{"label":[800.0,538.0],"stack":[770.0,536.0]},"ES":{"label":[812.0,365.0],"stack":[787.0,418.0]},"EN":{"label":[812.0,105.0],"stack":[807.0,138.0]},"PS":{"label":[812.0,400.0],"stack":[817.0,433.0]},"RE":{"label":[557.5,62.0],"stack":[552.5,95.0]},"RN":{"label":[398.0,117.5],"stack":[393.0,150.5]},"RC":{"label":[398.0,317.5],"stack":[393.0,350.5]},"RS":{"label":[398.0,429.67],"stack":[393.0,462.67]},"N":{"label":[747.33,190.63],"stack":[767.33,213.63]},"NE":{"label":[744.09,235.0],"stack":[739.09,268.0]},"NW":{"label":[673.44,245.0],"stack":[668.44,278.0]},"C":{"label":[656.21,315.0],"stack":[651.21,348.0]},"SW":{"label":[652.62,385.0],"stack":[647.62,418.0]},"S":{"label":[669.38,464.77],"stack":[664.38,497.77]},"E":{"label":[739.03,340.0],"stack":[734.03,373.0]},"PH":{"label":[554.23,347.13],"stack":[549.23,380.13]},"KM":{"label":[430.87,252.41],"stack":[425.87,285.4]},"MZ":{"label":[595.0,85.0],"stack":[590.0,118.0]},"WQ":{"label":[546.0,200.0],"stack":[541.0,233.0]},"DS":{"label":[398.0,538.0],"stack":[428.0,536.0]},"LY":{"label":[754.73,497.45],"stack":[739.73,540.45]},"GI":{"label":[749.0,434.0],"stack":[744.0,467.0]}}},"source":"Natural Earth (public domain), data/regions_v03.json","regions":{"SN":{"path":"M415.00 235.00 L700.00 235.00 L700.00 60.00 L415.00 60.00 Z","label":[557.5,147.5],"stack":[572.5,175.5]},"SC":{"path":"M415.00 350.00 L700.00 350.00 L700.00 235.00 L415.00 235.00 Z","label":[557.5,292.5],"stack":[572.5,320.5]},"SS":{"path":"M415.00 520.00 L700.00 520.00 L700.00 350.00 L415.00 350.00 Z","label":[557.5,435.0],"stack":[552.5,468.0]},"SWS":{"path":"M0.00 800.00 L600.00 800.00 L600.00 520.00 L0.00 520.00 Z","label":[300.0,660.0],"stack":[295.0,693.0]},"BS":{"path":"M600.00 800.00 L1000.00 800.00 L1000.00 520.00 L600.00 520.00 Z","label":[800.0,660.0],"stack":[795.0,693.0]},"ES":{"path":"M700.00 520.00 L1000.00 520.00 L1000.00 210.00 L700.00 210.00 Z","label":[850.0,365.0],"stack":[845.0,398.0]},"EN":{"path":"M700.00 210.00 L1000.00 210.00 L1000.00 0.00 L700.00 0.00 Z","label":[850.0,105.0],"stack":[845.0,138.0]},"PS":{"path":"M1000.00 800.00 L1100.00 800.00 L1100.00 0.00 L1000.00 0.00 Z","label":[1050.0,400.0],"stack":[1045.0,433.0]},"RE":{"path":"M415.00 60.00 L700.00 60.00 L700.00 0.00 L415.00 0.00 Z","label":[557.5,30.0],"stack":[552.5,63.0]},"RN":{"path":"M0.00 235.00 L0.00 0.00 L415.00 0.00 L414.03 235.00 Z","label":[207.5,117.5],"stack":[202.5,150.5]},"RC":{"path":"M0.00 400.00 L0.00 235.00 L414.03 235.00 L411.04 241.59 L404.44 238.23 L403.74 243.94 L400.29 243.76 L400.93 241.93 L397.49 244.73 L405.81 248.41 L399.95 252.91 L402.17 255.43 L386.77 251.04 L382.59 251.95 L390.11 254.68 L379.13 253.25 L390.73 261.51 L404.30 259.33 L401.59 267.32 L405.30 265.31 L409.06 265.85 L412.65 273.80 L407.18 274.54 L398.93 280.69 L397.88 283.79 L394.36 278.74 L390.73 281.37 L393.78 283.83 L389.58 291.34 L389.36 297.20 L383.91 297.64 L377.20 304.11 L374.81 309.25 L372.93 308.06 L373.79 304.95 L379.81 297.82 L376.17 298.52 L377.61 296.27 L376.33 292.97 L375.00 296.27 L372.41 296.62 L366.71 293.73 L367.97 296.10 L370.88 296.45 L368.85 300.25 L369.51 304.64 L364.86 309.08 L362.55 315.98 L363.93 320.59 L359.17 326.29 L359.82 314.76 L357.11 309.67 L341.66 305.32 L340.97 308.66 L346.85 308.81 L349.96 312.59 L349.01 316.74 L346.35 321.17 L343.43 322.41 L338.24 320.48 L331.91 323.84 L329.26 321.05 L327.74 321.78 L329.23 323.78 L326.36 334.46 L327.91 336.37 L325.71 338.44 L323.90 339.45 L322.95 330.72 L320.85 333.51 L321.92 337.04 L315.08 339.31 L308.42 344.94 L306.84 334.87 L302.34 334.13 L295.07 338.91 L291.76 336.21 L294.09 334.13 L291.65 333.73 L287.21 339.31 L288.33 344.04 L284.97 348.87 L287.26 352.62 L286.66 354.98 L277.32 365.06 L265.78 364.55 L252.32 358.15 L252.32 362.25 L257.30 367.63 L264.19 368.12 L269.12 366.10 L270.94 368.02 L274.86 367.37 L277.71 375.96 L280.48 376.39 L278.39 378.76 L270.56 372.34 L266.72 371.87 L271.51 375.62 L267.12 378.54 L264.68 383.70 L261.52 382.17 L261.15 376.13 L250.89 376.59 L252.70 379.94 L256.40 377.70 L260.45 379.04 L254.51 385.52 L253.36 389.09 L256.33 398.12 L252.73 400.00 Z","label":[207.01,317.5],"stack":[202.01,350.5]},"RS":{"path":"M0.00 464.10 L0.00 451.14 L2.99 452.17 L3.06 450.45 L8.53 447.71 L4.20 449.32 L0.00 446.97 L0.00 400.00 L252.73 400.00 L249.47 406.06 L237.96 407.10 L228.91 402.11 L221.36 401.72 L220.10 402.65 L228.15 404.21 L217.10 413.55 L209.57 417.41 L209.13 413.16 L212.37 410.53 L204.21 406.71 L208.73 411.03 L207.62 413.21 L195.80 419.53 L188.35 420.54 L182.60 425.34 L179.78 424.56 L178.80 420.22 L181.36 422.37 L180.48 418.49 L173.69 414.83 L169.70 414.93 L170.36 413.07 L168.25 411.18 L172.13 409.55 L173.03 406.58 L157.79 412.27 L156.06 415.07 L153.30 413.80 L154.76 410.46 L150.56 410.22 L145.09 406.81 L140.60 407.50 L142.73 409.94 L148.30 409.82 L149.42 413.92 L146.80 415.07 L155.94 416.39 L161.21 413.64 L152.70 423.30 L152.39 425.82 L155.56 428.56 L156.73 425.27 L159.01 426.28 L156.25 429.44 L157.52 433.17 L146.48 429.90 L137.35 430.58 L133.85 426.69 L142.41 423.80 L141.12 421.17 L136.40 423.64 L133.06 421.15 L123.34 421.18 L123.28 419.47 L132.02 414.95 L131.71 409.55 L130.38 409.70 L124.56 416.46 L117.29 417.88 L118.03 421.52 L113.29 418.85 L106.55 420.40 L101.78 426.30 L102.89 429.16 L98.53 431.07 L95.47 429.65 L94.17 424.61 L92.68 423.88 L91.68 425.60 L86.25 423.68 L88.07 427.85 L92.67 428.31 L96.66 432.35 L90.19 440.19 L91.91 443.88 L89.60 445.25 L88.02 444.09 L88.68 440.91 L86.58 439.83 L75.41 441.03 L74.38 439.06 L74.20 426.73 L82.13 420.94 L77.52 418.42 L75.49 421.83 L69.55 420.74 L56.33 426.73 L57.11 429.76 L52.21 429.40 L50.66 435.35 L59.03 435.61 L49.54 443.80 L50.93 445.05 L54.32 443.06 L61.77 448.59 L51.58 454.74 L48.51 453.17 L47.96 445.38 L40.87 438.84 L27.62 441.20 L21.00 446.55 L25.46 444.90 L28.92 449.48 L33.51 449.36 L25.38 454.82 L21.18 452.94 L21.71 455.21 L16.75 455.19 L21.18 457.94 L20.93 460.13 L23.82 456.46 L26.72 456.93 L27.26 459.03 L28.90 457.40 L27.65 455.60 L32.37 452.00 L34.76 457.71 L35.99 453.88 L37.02 456.00 L39.98 456.39 L40.13 458.73 L38.18 458.09 L37.02 460.20 L38.97 463.40 L37.64 462.94 L35.76 466.76 L31.86 461.06 L27.80 460.90 L27.65 465.20 L25.84 463.79 L27.26 467.93 L31.16 470.27 L28.90 471.28 L29.67 474.17 L25.55 467.77 L23.89 471.83 L19.55 468.17 L17.19 471.13 L10.48 463.01 L1.50 464.10 Z","label":[139.0,429.67],"stack":[134.0,462.67]},"N":{"path":"M694.12 210.00 L705.93 194.98 L737.88 184.21 L744.32 186.36 L739.91 180.79 L746.13 173.81 L753.97 171.26 L759.79 172.86 L764.97 180.29 L768.44 179.95 L767.64 182.06 L770.39 184.31 L790.51 189.34 L791.92 197.80 L800.54 199.81 L792.68 203.34 L786.05 210.00 Z","label":[747.33,190.63],"stack":[767.33,213.63]},"NE":{"path":"M700.00 260.00 L700.00 210.00 L786.05 210.00 L780.88 219.48 L781.50 235.56 L788.18 240.22 L784.08 240.97 L785.60 244.95 L783.01 248.08 L784.00 251.86 L778.00 256.73 L778.06 260.00 Z","label":[744.09,235.0],"stack":[739.09,268.0]},"NW":{"path":"M646.88 280.00 L655.81 261.41 L664.89 251.61 L670.22 239.30 L677.81 233.43 L682.67 233.39 L694.12 210.00 L700.00 210.00 L700.00 280.00 Z","label":[673.44,245.0],"stack":[668.44,278.0]},"C":{"path":"M612.43 348.00 L614.17 346.21 L614.36 336.20 L618.92 322.52 L629.22 308.81 L635.04 296.19 L641.19 290.31 L642.20 284.78 L646.88 280.00 L700.00 280.00 L700.00 350.00 L612.48 350.00 Z","label":[656.21,315.0],"stack":[651.21,348.0]},"SW":{"path":"M605.24 394.42 L610.04 390.30 L605.94 388.93 L608.92 388.23 L605.94 384.90 L608.69 381.80 L607.86 379.30 L612.47 370.50 L611.65 368.21 L614.89 367.77 L612.08 365.87 L613.01 363.90 L616.46 363.83 L613.05 354.90 L615.75 350.85 L612.48 350.00 L700.00 350.00 L700.00 420.00 L619.81 420.00 L620.35 416.03 L614.21 401.97 L616.62 396.83 L614.21 396.51 L611.41 399.24 L610.79 395.14 L605.52 395.63 Z","label":[652.62,385.0],"stack":[647.62,418.0]},"S":{"path":"M619.81 420.00 L718.94 420.00 L702.91 434.25 L694.83 447.32 L688.14 465.41 L687.92 494.42 L683.57 501.27 L684.03 509.54 L676.74 504.07 L673.73 503.39 L672.73 506.55 L670.04 505.16 L668.17 497.75 L669.70 488.68 L662.13 470.49 L651.20 457.52 L633.12 448.03 L628.52 441.99 L633.37 447.41 L631.35 442.29 L624.58 435.75 L624.63 429.01 L620.00 420.75 Z","label":[669.38,464.77],"stack":[664.38,497.77]},"E":{"path":"M700.00 420.00 L700.00 260.00 L778.06 260.00 L775.86 266.77 L777.27 269.08 L766.29 280.69 L760.74 292.32 L762.92 298.50 L752.15 334.13 L746.22 365.70 L740.89 374.54 L740.01 385.45 L734.74 391.67 L729.96 404.08 L719.03 415.68 L718.94 420.00 Z","label":[739.03,340.0],"stack":[734.03,373.0]},"PH":{"path":"M552.71 346.00 L558.72 345.12 L555.24 343.75 L555.24 340.96 L561.31 338.97 L560.63 340.96 L564.80 339.65 L566.58 342.67 L566.85 345.12 L564.06 343.65 L558.24 348.11 L554.56 347.69 Z M544.24 343.75 L547.45 342.03 L550.13 334.96 L551.73 336.24 L549.17 342.90 L545.66 343.75 Z M554.53 333.51 L556.64 332.08 L559.62 334.67 L557.68 337.75 L556.18 335.02 Z M540.76 378.66 L543.60 378.03 L541.33 380.30 Z M539.70 375.45 L542.07 376.32 L539.80 376.32 Z M560.03 374.72 L561.07 374.43 L560.43 375.18 Z M560.94 374.35 L561.01 374.10 L561.09 374.35 Z M565.81 374.30 L566.93 373.67 L566.02 374.75 Z M564.77 373.67 L565.23 373.41 L564.89 373.72 Z M549.74 373.16 L550.19 372.54 L550.42 372.88 Z M532.67 368.12 L532.92 368.08 L532.77 368.27 Z M531.19 367.58 L531.44 367.54 L531.30 367.73 Z M532.67 367.47 L532.97 367.66 L532.81 368.01 Z M551.27 363.78 L553.27 362.80 L551.42 363.90 Z M547.10 361.26 L548.50 359.37 L550.31 364.33 L547.96 364.19 L547.32 362.07 Z M530.65 359.83 L532.07 359.14 L530.94 360.00 Z M549.97 350.79 L553.44 350.27 L550.10 351.43 Z M558.85 325.70 L561.28 325.02 L559.41 327.25 L559.02 326.04 Z","label":[554.23,347.13],"stack":[549.23,380.13]},"KM":{"path":"M427.96 259.16 L429.27 256.79 L428.21 252.26 L431.67 250.67 L438.14 252.65 L439.42 247.73 L442.26 247.20 L444.96 249.45 L446.74 253.82 L444.88 258.45 L440.36 256.40 L431.82 260.95 L428.39 259.87 Z M415.00 256.46 L415.00 246.57 L418.14 246.49 L418.87 250.59 L415.38 256.29 Z M420.90 258.84 L423.31 254.92 L426.27 255.82 L422.02 259.25 Z M429.77 243.86 L433.55 244.44 L432.65 245.68 L430.13 244.26 Z","label":[430.87,252.41],"stack":[425.87,285.4]},"MZ":{"path":"M585.00 85.00 L587.93 92.07 L595.00 95.00 L602.07 92.07 L605.00 85.00 L602.07 77.93 L595.00 75.00 L587.93 77.93 Z","label":[595.0,85.0],"stack":[590.0,118.0]},"WQ":{"path":"M536.00 200.00 L538.93 207.07 L546.00 210.00 L553.07 207.07 L556.00 200.00 L553.07 192.93 L546.00 190.00 L538.93 192.93 Z","label":[546.0,200.0],"stack":[541.0,233.0]},"DS":{"path":"M262.00 630.00 L264.93 637.07 L272.00 640.00 L279.07 637.07 L282.00 630.00 L279.07 622.93 L272.00 620.00 L264.93 622.93 Z","label":[272.0,630.0],"stack":[267.0,663.0]},"LY":{"path":"M749.20 491.78 L756.66 491.78 L756.01 494.65 L758.77 498.61 L751.32 496.49 L749.88 492.52 Z M759.82 504.77 L760.12 504.28 L760.25 505.12 Z","label":[754.73,497.45],"stack":[749.73,530.45]},"GI":{"path":"M739.00 434.00 L741.93 441.07 L749.00 444.00 L756.07 441.07 L759.00 434.00 L756.07 426.93 L749.00 424.00 L741.93 426.93 Z","label":[749.0,434.0],"stack":[744.0,467.0]}}};
   if (typeof module === 'object' && module.exports) module.exports = value;
   if (root) root.StraitMapV03 = value;
 }(typeof window !== 'undefined' ? window : null));
@@ -1632,7 +1651,7 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
   'use strict';
   // Round-2 battle playback: big, loud, Red-Alert-style effects. SVG + WebAudio, no assets.
   var NS = 'http://www.w3.org/2000/svg', active = null, audio = null, master = null, noiseBuf = null;
-  var CAP = 90, MAX_TURN_MS = 9000;
+  var CAP = 90, MAX_TURN_MS = 6800;
   var PHASES = [
     { types: ['strike'], title: '飛彈打擊' },
     { types: ['air'], title: '制空作戰' },
@@ -1768,6 +1787,7 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
       });
     }
     function stamp(at, p, text, color, dmg, destroyed, side) {
+      if (dmg && opts.onImpact && (opts.playerSide === null || side.side !== opts.playerSide)) sched(at, 1, function () { opts.onImpact(); return noop; });
       if (dmg) floatText(at, [p[0], p[1] - 12 * S], '−' + dmg, '#ff685c', 30, 1200);
       floatText(at + 120, [p[0], p[1] + 14 * S], destroyed ? '殲滅' : text, color, destroyed ? 27 : 22, 1100);
       if (dmg) sched(at, 450, function () {
@@ -2256,7 +2276,7 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
     },
     { // 7
       view: function () { return { text: '按『結束本日』，看雙方同時行動的結果。', target: { sel: '#end-turn' }, hideSheet: true }; },
-      done: function (s) { return s.turn >= 2 && !s.playing; }
+      done: stepSevenDone
     }
   ];
 
@@ -2475,7 +2495,8 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
     return self;
   }
 
-  return { DONE_KEY: DONE_KEY, TOTAL: TOTAL, coachText: coachText, goalText: goalText, create: create };
+  function stepSevenDone(s) { return s.resolvedDay >= 1 && !s.playing; }
+  return { DONE_KEY: DONE_KEY, TOTAL: TOTAL, coachText: coachText, goalText: goalText, stepSevenDone: stepSevenDone, create: create };
 }));
 
 </script>
@@ -2585,7 +2606,35 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
     var enemy = side === 'blue' ? 'red' : 'blue';
     return { rows: rows, losses: losses, damaged: damaged, totals: side ? '敵方損失 ' + losses[enemy] + ' 點戰力・我方損失 ' + losses[side] + ' 點' : '紅方損失 ' + losses.red + ' 點戰力・藍方損失 ' + losses.blue + ' 點' };
   }
-  return { buildBattleReport: buildBattleReport };
+  function stripSummary(report, before, next, side) {
+    var strikes = next.events.filter(function (e) { return e.type === 'strike' && (side === null || e.side === side); });
+    var hits = strikes.filter(function (e) { return !!e.hit; }).length;
+    var kills = report.damaged.filter(function (d) { return d.after <= 0 && (side === null || d.side !== side); }).length;
+    var enemy = side === 'blue' ? 'red' : 'blue';
+    var gain = side === null ? report.losses.blue + report.losses.red : report.losses[enemy] - report.losses[side];
+    var pressure = next.pressure - before.pressure;
+    return { text: '第' + (next.turn - 1) + '日戰果：命中 ' + hits + '・未命中 ' + (strikes.length - hits) + '・殲滅 ' + kills + '｜國際壓力 ' + (pressure >= 0 ? '+' : '') + pressure + '（' + next.pressure + '/100）',
+      tone: gain > 0 ? 'good' : gain < 0 ? 'bad' : 'even' };
+  }
+  function dayHeadline(report, before, after, side, aliases) {
+    var day = '第' + (after.turn - 1) + '日：';
+    var captured = after.events.find(function (e) { return (e.type === 'capture' || e.type === 'flip') && e.side === 'red' && before.zones.some(function (z) { return z.id === e.zone && z.type === 'land'; }); });
+    if (captured) {
+      var area = before.zones.find(function (z) { return z.id === captured.zone; });
+      return day + '紅方登陸' + area.name + '！';
+    }
+    var enemy = side === 'red' ? 'blue' : 'red';
+    var killed = report.damaged.find(function (d) { return d.after <= 0 && d.side === enemy; });
+    if (killed) return day + (side === null ? (enemy === 'red' ? '藍方' : '紅方') : '你') + '殲滅了' + (aliases[killed.id] ? aliases[killed.id].sideCode : '敵方部隊') + '！';
+    if (report.damaged.some(function (d) { return d.zone === 'N' && (side === null || d.side === side); })) return day + '北部遭攻擊！';
+    var lost = report.losses || { red: 0, blue: 0 };
+    var enemyLoss = side === null ? lost.red + lost.blue : lost[enemy];
+    var ownLoss = side === null ? 0 : lost[side];
+    if (enemyLoss > 0 && enemyLoss >= ownLoss) return day + (side === null ? '雙方交火，共損 ' + enemyLoss + ' 點戰力' : '重創敵軍 ' + enemyLoss + ' 點戰力！');
+    if (ownLoss > 0) return day + '我方受創 ' + ownLoss + ' 點戰力';
+    return day + '雙方試探';
+  }
+  return { buildBattleReport: buildBattleReport, stripSummary: stripSummary, dayHeadline: dayHeadline };
 }));
 
 </script>
@@ -2731,7 +2780,10 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
   var justAssigned = false;
   var flashZones = [];
   var reportOpen = false;
-  var fxPrefs = { speed: 1, muted: false };
+  var latestReport = null;
+  var headlineTimer = null;
+  var shakeTimer = null;
+  var fxPrefs = { speed: 2, muted: false };
   try { var storedFX = JSON.parse(window.localStorage.getItem('strait.fx'));
     if (storedFX && [1, 2, 4].indexOf(storedFX.speed) >= 0) fxPrefs.speed = storedFX.speed;
     if (storedFX && typeof storedFX.muted === 'boolean') fxPrefs.muted = storedFX.muted;
@@ -3146,6 +3198,8 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
     hold: '什麼都不做，恢復戰力'
   };
   function unitCard(actor, assigned, parent, action, active, compact) {
+    var row = document.createElement('div');
+    row.className = 'unit-list-row';
     var card = document.createElement('button');
     card.type = 'button';
     card.className = 'unit-button type-' + actor.type + (active ? ' active' : '') + (compact ? ' chip' : '');
@@ -3176,7 +3230,10 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
     card.appendChild(body);
     card.addEventListener('click', action);
     hoverable(card, actor.id);
-    parent.appendChild(card);
+    row.appendChild(card);
+    var defend = button(assigned ? '已下令' : '防守', row, function () { assign({ unit: actor.id, kind: 'defend' }); }, 'quick-defend ghost');
+    defend.disabled = !!assigned || playing || remainingPoints() < E.orderCost({ unit: actor.id, kind: 'defend' });
+    parent.appendChild(row);
     return card;
   }
   function orderButton(order, parent, withDesc) {
@@ -3208,6 +3265,8 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
     var list = el(wide ? 'unit-list' : 'sheet-units');
     var options = el(wide ? 'order-options' : 'sheet-orders');
     ['unit-list', 'order-options', 'sheet-units', 'sheet-orders'].forEach(function (id) { el(id).replaceChildren(); });
+    el('defend-all').classList.add('hidden');
+    el('sheet-defend-all').classList.add('hidden');
     el('selection-heading').textContent = '點地圖選區域';
     el('selection-hint').textContent = '點選地圖上的區域，查看己方單位。';
     if (!selectedZone) return;
@@ -3230,6 +3289,9 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
         render();
       }, selectedUnit === actor.id, !wide);
     });
+    var bulk = el(wide ? 'defend-all' : 'sheet-defend-all');
+    bulk.classList.toggle('hidden', !friendly.length);
+    bulk.disabled = !friendly.some(function (actor) { return !hasOrder(actor.id); }) || remainingPoints() < 1;
     if (!selectedUnit || !unit(selectedUnit)) return;
     var actor = unit(selectedUnit);
     var available = E.legalOrders(game, actor.id);
@@ -3412,7 +3474,7 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
   function tutorialSnapshot() {
     var actor = selectedUnit && game ? unit(selectedUnit) : null;
     return {
-      turn: game ? game.turn : 0, playing: playing, selectedZone: selectedZone, selectedUnit: selectedUnit,
+      turn: game ? game.turn : 0, resolvedDay: game ? game.turn - 1 : 0, playing: playing, selectedZone: selectedZone, selectedUnit: selectedUnit,
       selectedType: actor ? actor.type : null, orders: orders.slice(), playerSide: playerSide
     };
   }
@@ -3482,7 +3544,7 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
     el('pressure-fill').style.backgroundSize = (10000 / Math.max(game.pressure, 1)) + '% 100%';
     el('pressure-fill').parentNode.setAttribute('aria-valuenow', game.pressure);
     renderVictory();
-    ['ai-help', 'clear-orders', 'end-turn'].forEach(function (id) { el(id).disabled = playing || playerSide === null || !!game.winner; });
+    ['ai-help', 'ai-finish', 'clear-orders', 'end-turn'].forEach(function (id) { el(id).disabled = playing || playerSide === null || !!game.winner; });
     el('message').textContent = message;
     drawMap();
     renderSelection();
@@ -3550,14 +3612,32 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
     rows.replaceChildren();
     el('battle-report-totals').textContent = report.totals;
     el('battle-report-delta').textContent = report.delta || '';
-    if (playerSide === null) textNode('p', '雙方交戰結束，下一日即將開始。', rows, 'battle-row');
+    if (!report.rows.length) textNode('p', '本日雙方沒有下達命令。', rows, 'battle-row');
     else report.rows.forEach(function (row) { textNode('p', row.text, rows, 'battle-row battle-' + row.status); });
     box.classList.remove('hidden');
     return new Promise(function (resolve) {
       var done = function () { box.classList.add('hidden'); el('battle-report-continue').removeEventListener('click', done); resolve(); };
       el('battle-report-continue').addEventListener('click', done);
-      if (playerSide === null) setTimeout(done, 2200);
     });
+  }
+  function showDayHeadline(text) {
+    var banner = el('day-headline');
+    if (headlineTimer) clearTimeout(headlineTimer);
+    banner.textContent = text;
+    banner.classList.remove('hidden', 'headline-enter');
+    void banner.offsetWidth;
+    banner.classList.add('headline-enter');
+    headlineTimer = setTimeout(function () { banner.classList.add('hidden'); }, 1800);
+  }
+  function impact() {
+    if (reducedFX) return;
+    var card = el('map').closest('.map-card');
+    card.classList.remove('impact-shake');
+    void card.offsetWidth;
+    card.classList.add('impact-shake');
+    if (shakeTimer) clearTimeout(shakeTimer);
+    shakeTimer = setTimeout(function () { card.classList.remove('impact-shake'); }, 200);
+    if (narrowQuery && narrowQuery.matches && navigator.vibrate) navigator.vibrate(30);
   }
   async function advance() {
     if (!game || game.winner || playing) return;
@@ -3575,9 +3655,14 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
       blueOrders = playerSide === 'blue' ? orders : aiOrders;
     }
     try {
+      latestReport = null;
+      el('result-strip').classList.add('hidden');
+      el('day-headline').classList.add('hidden');
       var visible = game.fog && playerSide !== null ? new Set(E.visibleZones(game, playerSide)) : null;
       var next = E.resolveTurn(game, redOrders, blueOrders);
-      var report = BR.buildBattleReport(game, next, playerSide === 'red' ? redOrders : playerSide === 'blue' ? blueOrders : [], playerSide, aliases);
+      var report = BR.buildBattleReport(game, next, playerSide === 'red' ? redOrders : playerSide === 'blue' ? blueOrders : redOrders.concat(blueOrders), playerSide, aliases);
+      var headline = BR.dayHeadline(report, game, next, playerSide, aliases);
+      var summary = BR.stripSummary(report, game, next, playerSide);
       var beforeVictory = VC.snapshot(game);
       var afterVictory = VC.snapshot(next);
       report.delta = VC.delta(beforeVictory, afterVictory);
@@ -3588,7 +3673,7 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
       if (beforeVictory.redLand !== afterVictory.redLand || beforeVictory.redIslands !== afterVictory.redIslands || beforeVictory.supply !== afterVictory.supply) changedMeters.push('land');
       var fxEvents = prepareBattleEvents(next, report);
       playing = true;
-      el('end-turn').disabled = true;
+      ['ai-help', 'ai-finish', 'clear-orders', 'end-turn'].forEach(function (id) { el(id).disabled = true; });
       el('map').classList.add('map-playing');
       hoverUnit = null;
       applyHighlight();
@@ -3599,7 +3684,7 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
       // on phones the end-turn button sits below the map; bring the battle into view
       var mapBox = el('map').getBoundingClientRect();
       if (!reducedFX && narrowQuery && narrowQuery.matches && (mapBox.top < 0 || mapBox.bottom > window.innerHeight)) el('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      await FX.play(el('map'), mapGeo(), fxEvents, { speed: fxPrefs.speed, muted: fxPrefs.muted, visible: visible, reduced: reducedFX, turn: game.turn, sea: game.zones.filter(function (z) { return z.type === 'sea'; }).map(function (z) { return z.id; }) });
+      await FX.play(el('map'), mapGeo(), fxEvents, { speed: fxPrefs.speed, muted: fxPrefs.muted, visible: visible, reduced: reducedFX, turn: game.turn, playerSide: playerSide, onImpact: impact, sea: game.zones.filter(function (z) { return z.type === 'sea'; }).map(function (z) { return z.id; }) });
       history.push({ turn: game.turn, red: redOrders, blue: blueOrders, losses: report.losses, report: ['第' + game.turn + '日：本日戰報　' + report.totals].concat(report.rows.map(function (row) { return '第' + game.turn + '日：' + row.text; })) });
       game = next;
       persist();
@@ -3609,13 +3694,21 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
       targetChoice = null;
       setMessage('第 ' + (game.turn - 1) + ' 日結算完成。');
       playing = false;
-      reportOpen = true;
       el('map').classList.remove('map-playing');
       el('fx-skip').classList.add('hidden');
-      render();
-      await showBattleReport(report);
-      reportOpen = false;
-      render();
+      latestReport = report;
+      if (game.winner) {
+        reportOpen = true;
+        render();
+        await showBattleReport(report);
+        reportOpen = false;
+        render();
+      } else {
+        el('result-strip-text').textContent = summary.text;
+        el('result-strip').className = 'result-strip tone-' + summary.tone;
+        render();
+        showDayHeadline(headline);
+      }
       if (meterTimer) clearTimeout(meterTimer);
       meterTimer = setTimeout(function () { changedMeters = []; if (game && !playing) renderVictory(); }, 1800);
       flashZones = report.damaged.map(function (d) { return d.zone; });
@@ -3633,6 +3726,9 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
     history = [];
     mapResultVisible = false;
     changedMeters = [];
+    latestReport = null;
+    el('result-strip').classList.add('hidden');
+    el('day-headline').classList.add('hidden');
     persist();
     orders = [];
     selectedZone = null;
@@ -3733,6 +3829,8 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
     tutorialMode = false;
     mapResultVisible = false;
     changedMeters = [];
+    latestReport = null;
+    el('result-strip').classList.add('hidden');
     orders = []; selectedZone = null; selectedUnit = null; focusMark = null; targetChoice = null;
     rebuildAliases();
     message = restored.warnings.join('；');
@@ -3759,6 +3857,25 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
   el('start-watch').addEventListener('click', function () { FX.unlockAudio(); start(null); });
   showFXControls();
   el('fx-skip').addEventListener('click', function () { FX.skip(); });
+  el('map').addEventListener('click', function () { if (playing) FX.skip(); });
+  el('result-detail').addEventListener('click', async function () {
+    if (!latestReport || reportOpen || playing) return;
+    if (watchTimer) { clearTimeout(watchTimer); watchTimer = null; }
+    reportOpen = true;
+    await showBattleReport(latestReport);
+    reportOpen = false;
+    if (tutCtl && tutCtl.active) tutCtl.onRender(tutorialSnapshot());
+    if (playerSide === null && game && !game.winner) watchTimer = setTimeout(advance, 1200);
+  });
+  function defendZone() {
+    if (!game || playerSide === null || playing || !selectedZone) return;
+    var pending = friendlyIn(selectedZone).filter(function (actor) { return !hasOrder(actor.id); });
+    pending.forEach(function (actor) {
+      if (remainingPoints() >= E.orderCost({ unit: actor.id, kind: 'defend' })) assign({ unit: actor.id, kind: 'defend' });
+    });
+  }
+  el('defend-all').addEventListener('click', defendZone);
+  el('sheet-defend-all').addEventListener('click', defendZone);
   el('armed-cancel').addEventListener('click', function () { selectedUnit = null; targetChoice = null; justAssigned = false; setMessage('已取消選中'); render(); });
   window.addEventListener('keydown', function (event) {
     if (event.key === 'Escape' && selectedUnit && !playing) {
@@ -3772,17 +3889,26 @@ button:focus-visible, input:focus-visible, .zone:focus-visible { outline: 2px so
   el('fx-mute').addEventListener('click', function () {
     fxPrefs.muted = !fxPrefs.muted; showFXControls(); saveFX();
   });
-  el('ai-help').addEventListener('click', function () {
-    if (!game || playerSide === null || game.winner) return;
-    var proposed = AI.chooseOrders(aiView(playerSide), playerSide, game.turn * 7919 + seed);
+  function fillAIOrders() {
+    if (!game || playerSide === null || game.winner || playing) return false;
+    var suggestions = AI.chooseOrders(aiView(playerSide), playerSide, game.turn * 7919 + seed);
+    var proposed = orders.slice();
+    suggestions.forEach(function (order) {
+      if (proposed.some(function (item) { return item.unit === order.unit; })) return;
+      var attempt = proposed.concat([order]);
+      if (E.validateOrders(game, playerSide, attempt).ok) proposed = attempt;
+    });
     var check = E.validateOrders(game, playerSide, proposed);
-    if (!check.ok) { setMessage(check.errors.join('、')); return; }
+    if (!check.ok) { setMessage(check.errors.join('、')); return false; }
     orders = proposed;
-    selectedUnit = null;
+    selectedZone = null; selectedUnit = null; targetChoice = null; focusMark = null;
     justAssigned = false;
     setMessage('AI 已填入本日命令。');
     render();
-  });
+    return true;
+  }
+  el('ai-help').addEventListener('click', fillAIOrders);
+  el('ai-finish').addEventListener('click', function () { if (fillAIOrders()) advance(); });
   el('clear-orders').addEventListener('click', function () {
     orders = [];
     selectedUnit = null;
